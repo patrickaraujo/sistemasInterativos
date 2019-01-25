@@ -1,5 +1,4 @@
 // C++ program for implementation of RR scheduling
-// https://www.geeksforgeeks.org/program-round-robin-scheduling-set-1/
 
 #include<iostream>
 using namespace std;
