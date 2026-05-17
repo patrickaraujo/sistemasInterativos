@@ -1,6 +1,6 @@
-# Sistemas Interativos — Algoritmos de Escalonamento
+# Sistemas Interativos - Algoritmos de Escalonamento
 
-Coletânea de implementações de algoritmos clássicos de **escalonamento de processos** para sistemas interativos, em C, C++ e Java. O repositório agrupa sete algoritmos distintos, do mais simples ao mais elaborado, com foco didático.
+Coletânea de implementações de algoritmos clássicos de **escalonamento de processos** para sistemas interativos, em C, C++ e Java. O repositório agrupa sete famílias de algoritmos, algumas com mais de uma implementação, totalizando versões em C, C++ e Java com foco didático.
 
 ---
 
@@ -10,12 +10,12 @@ Coletânea de implementações de algoritmos clássicos de **escalonamento de pr
 2. [Como compilar e executar](#como-compilar-e-executar)
 3. [Algoritmos implementados](#algoritmos-implementados)
    - [SJF / SRTN](#1-sjf--srtn-shortest-remaining-time-next)
-   - [Round Robin](#2-round-robin)
-   - [Priority Scheduling](#3-priority-scheduling)
+   - [Round Robin em C e C++](#2-round-robin-em-c-e-c)
+   - [Priority Scheduling em C e C++](#3-priority-scheduling-em-c-e-c)
    - [Multilevel Queue](#4-multilevel-queue)
-   - [Lottery Scheduling](#5-lottery-scheduling)
-   - [Fair Share Scheduling](#6-fair-share-scheduling)
-   - [Escalonamento Garantido](#7-escalonamento-garantido)
+   - [Lottery Scheduling em C e Java](#5-lottery-scheduling-em-c-e-java)
+   - [Fair Share Scheduling em C e Java](#6-fair-share-scheduling-em-c-e-java)
+   - [Escalonamento Garantido em C e Java](#7-escalonamento-garantido-em-c-e-java)
 4. [Comparativo dos algoritmos](#comparativo-dos-algoritmos)
 5. [Correções aplicadas](#correções-aplicadas)
 6. [Limitações conhecidas](#limitações-conhecidas)
@@ -28,18 +28,33 @@ Coletânea de implementações de algoritmos clássicos de **escalonamento de pr
 sistemasInterativos-master/
 ├── README.md
 ├── sjf/
-│   └── srtn.c                      # Shortest Remaining Time Next (SJF preemptivo)
-├── round-robin/
-│   └── round_Robin.cpp             # Round Robin
-├── priority/
-│   └── priority.cpp                # Priority Scheduling não-preemptivo
+│   ├── README.md
+│   └── srtn.c                         # Shortest Remaining Time Next (SJF preemptivo)
+├── round-robin_cpp/
+│   ├── README.md
+│   └── round_Robin.cpp                # Round Robin em C++
+├── round_robin_c/
+│   ├── README.md
+│   └── round_robin.c                  # Round Robin em C
+├── priority_cpp/
+│   ├── README.md
+│   └── priority.cpp                   # Priority Scheduling em C++
+├── priority_c/
+│   ├── README.md
+│   └── priority.c                     # Priority Scheduling em C
 ├── multilevel/
-│   └── multiLevel.c                # Multilevel Queue (RR + Priority + FCFS)
-├── lottery/
-│   └── Lottery.java                # Lottery Scheduling
-├── fair-share/
+│   ├── README.md
+│   └── multiLevel.c                   # Multilevel Queue (RR + Priority + FCFS)
+├── lottery_Java/
+│   ├── README.md
+│   └── Lottery.java                   # Lottery Scheduling em Java
+├── lottery_c/
+│   ├── README.md
+│   └── lottery.c                      # Lottery Scheduling em C
+├── fair-share_Java/
+│   ├── README.md
 │   └── src/
-│       ├── scheduler/              # Núcleo do escalonador FSS
+│       ├── scheduler/                 # Núcleo do escalonador Fair Share
 │       │   ├── FSSLogger.java
 │       │   ├── IdleProcess.java
 │       │   ├── Process.java
@@ -47,28 +62,19 @@ sistemasInterativos-master/
 │       │   ├── ReadyQueue.java
 │       │   └── ShareGroup.java
 │       └── tester/
-│           └── ScheduleTest.java   # Programa de teste
-└── garantido/
-    └── src/
-        ├── controller/             # MVC: lógica de escalonamento
-        │   ├── AbstractEscalonador.java
-        │   └── Escalonador.java
-        ├── model/                  # MVC: entidades (Processo, Memória, Fila…)
-        │   ├── AbstractFactory.java
-        │   ├── AbstractFilaProcesso.java
-        │   ├── AbstractMemoria.java
-        │   ├── AbstractProcessador.java
-        │   ├── BlocoMemoria.java
-        │   ├── FilaEntrada.java
-        │   ├── FilaProcessos.java
-        │   ├── Memoria.java
-        │   ├── ModeloTabelaProcessos.java
-        │   ├── Processador.java
-        │   ├── Processo.java
-        │   └── ProcessoFactory.java
-        └── view/                   # MVC: interface gráfica Swing
-            ├── TelaJFrame.java
-            └── TesteView.java
+│           └── ScheduleTest.java      # Programa de teste
+├── fair_share_c/
+│   ├── README.md
+│   └── fair_share.c                   # Fair Share Scheduler em C
+├── garantido_Java/
+│   ├── README.md
+│   └── src/
+│       ├── controller/                # MVC: lógica de escalonamento
+│       ├── model/                     # MVC: entidades
+│       └── view/                      # MVC: interface gráfica Swing
+└── escalonamento_garantido_c/
+    ├── README.md
+    └── escalonamento_garantido.c      # Escalonamento Garantido em C
 ```
 
 ---
@@ -77,67 +83,141 @@ sistemasInterativos-master/
 
 ### Pré-requisitos
 
-| Linguagem | Compilador / Runtime         | Versão mínima |
-|-----------|------------------------------|---------------|
-| C         | `gcc`                        | C99           |
-| C++       | `g++`                        | C++17         |
-| Java      | `javac` / `java` (OpenJDK)   | 11+           |
+| Linguagem | Compilador / Runtime       | Versão mínima |
+|-----------|----------------------------|---------------|
+| C         | `gcc`                      | C11           |
+| C++       | `g++`                      | C++17         |
+| Java      | `javac` / `java` (OpenJDK) | 11+           |
 
 ### SJF / SRTN
+
 ```bash
 cd sjf
-gcc -Wall -o srtn srtn.c
+gcc -std=c11 -Wall -Wextra -o srtn srtn.c
 ./srtn
 ```
-Entrada: número de processos, tempos de chegada, durações.
 
-### Round Robin
+Entrada: número de processos, tempos de chegada e durações.
+
+### Round Robin em C++
+
 ```bash
-cd round-robin
-g++ -std=c++17 -Wall -o round_robin round_Robin.cpp
+cd round-robin_cpp
+g++ -std=c++17 -Wall -Wextra -o round_robin round_Robin.cpp
 ./round_robin
 ```
-Não requer entrada (processos pré-definidos no `main`).
 
-### Priority Scheduling
+Não requer entrada. Os processos estão pré-definidos no `main`.
+
+### Round Robin em C
+
 ```bash
-cd priority
-g++ -std=c++17 -Wall -o priority priority.cpp
+cd round_robin_c
+gcc -std=c11 -Wall -Wextra -o round_robin round_robin.c
+./round_robin
+```
+
+Gera `log.txt` com a saída da simulação.
+
+### Priority Scheduling em C++
+
+```bash
+cd priority_cpp
+g++ -std=c++17 -Wall -Wextra -o priority priority.cpp
 ./priority
 ```
 
+### Priority Scheduling em C
+
+```bash
+cd priority_c
+gcc -std=c11 -Wall -Wextra -o priority priority.c
+./priority
+```
+
+Gera `log.txt` com a saída da simulação.
+
 ### Multilevel Queue
+
 ```bash
 cd multilevel
-gcc -Wall -o multilevel multiLevel.c
+gcc -std=c11 -Wall -Wextra -o multilevel multiLevel.c
 ./multilevel
 ```
-Entrada: faixas de prioridade de cada uma das 3 filas, quantidade de processos, prioridade e burst time de cada processo.
 
-### Lottery
+Entrada: faixas de prioridade das três filas, quantidade de processos, prioridade e burst time de cada processo.
+
+### Lottery Scheduling em Java
+
 ```bash
-cd lottery
+cd lottery_Java
 javac -d . Lottery.java
 java lottery.Lottery
 ```
 
-### Fair Share
+### Lottery Scheduling em C
+
 ```bash
-cd fair-share/src
+cd lottery_c
+gcc -std=c11 -Wall -Wextra -o lottery lottery.c
+./lottery
+```
+
+Também aceita seed fixa:
+
+```bash
+./lottery --seed 42
+```
+
+### Fair Share Scheduling em Java
+
+```bash
+cd fair-share_Java/src
 javac -d ../build $(find . -name "*.java")
 cd ../build
 java tester.ScheduleTest
 ```
+
 Gera `log.txt` com a evolução das taxas de uso de CPU por grupo.
 
-### Garantido (interface gráfica Swing)
+### Fair Share Scheduling em C
+
 ```bash
-cd garantido/src
+cd fair_share_c
+gcc -std=c11 -Wall -Wextra fair_share.c -lm -o fair_share
+./fair_share --fss
+```
+
+Também é possível comparar com prioridade simples do sistema:
+
+```bash
+./fair_share --system
+```
+
+### Escalonamento Garantido em Java (interface gráfica Swing)
+
+```bash
+cd garantido_Java/src
 javac -d ../build $(find . -name "*.java")
 cd ../build
 java view.TesteView
 ```
+
 Requer ambiente gráfico (X11 / Wayland no Linux, Aqua no macOS, Desktop no Windows).
+
+### Escalonamento Garantido em C
+
+```bash
+cd escalonamento_garantido_c
+gcc -std=c11 -Wall -Wextra escalonamento_garantido.c -lm -o escalonamento_garantido
+./escalonamento_garantido
+```
+
+Também é possível informar os surtos manualmente:
+
+```bash
+./escalonamento_garantido 10 4 7 13 6
+```
 
 ---
 
@@ -163,9 +243,11 @@ Pronto: [P1] [P1,P2] [P2] [P2] [P2] [P1] [P1] ...
 
 ---
 
-### 2. Round Robin
+### 2. Round Robin em C e C++
 
 Cada processo recebe a CPU por um **quantum** fixo. Quando o quantum expira, o processo volta para o fim da fila circular.
+
+**Implementações disponíveis:** `round-robin_cpp/round_Robin.cpp` e `round_robin_c/round_robin.c`.
 
 ```
 Quantum = 2
@@ -180,14 +262,16 @@ P2 →  │ 2u   │ ───── │ 2u   │ ...
       └──────┘       └──────┘
 ```
 
-**Vantagem**: justo, resposta rápida — ideal para sistemas interativos.
+**Vantagem**: justo, resposta rápida - ideal para sistemas interativos.
 **Desvantagem**: *overhead* alto se o quantum for muito pequeno; comporta-se como FCFS se o quantum for muito grande.
 
 ---
 
-### 3. Priority Scheduling
+### 3. Priority Scheduling em C e C++
 
-Cada processo tem uma prioridade; o de **maior prioridade** executa primeiro. Esta implementação é **não-preemptiva** e usa a convenção *"maior número = maior prioridade"*.
+Cada processo tem uma prioridade; o de **maior prioridade** executa primeiro. As implementações deste repositório são **não-preemptivas** e usam a convenção *"maior número = maior prioridade"*.
+
+**Implementações disponíveis:** `priority_cpp/priority.cpp` e `priority_c/priority.c`.
 
 ```
 Entrada (pid, burst, prioridade):
@@ -225,13 +309,15 @@ Combina **três filas** com políticas diferentes, cada uma recebendo uma fatia 
 Cada processo é colocado em **uma única fila** com base em sua prioridade e nas faixas configuradas pelo usuário.
 
 **Vantagem**: diferentes tipos de processo (interativos, batch) podem ser tratados com políticas adequadas.
-**Desvantagem**: rigidez — um processo nasce em uma fila e nunca migra (diferentemente do *Multilevel Feedback Queue*).
+**Desvantagem**: rigidez - um processo nasce em uma fila e nunca migra (diferentemente do *Multilevel Feedback Queue*).
 
 ---
 
-### 5. Lottery Scheduling
+### 5. Lottery Scheduling em C e Java
 
 Algoritmo **probabilístico**: cada processo recebe um número de "tickets" proporcional à sua demanda restante de CPU. A cada rodada, um ticket é sorteado e o processo vencedor executa por um quantum.
+
+**Implementações disponíveis:** `lottery_Java/Lottery.java` e `lottery_c/lottery.c`.
 
 ```
 Tickets por processo (proporcional a request restante):
@@ -246,13 +332,15 @@ Tickets por processo (proporcional a request restante):
 ```
 
 **Vantagem**: probabilisticamente justo; sem *starvation* (todo processo com tickets > 0 tem chance > 0); fácil ajustar a "prioridade" alterando o número de tickets.
-**Desvantagem**: variância — em curtos períodos, a distribuição real pode divergir bastante da proporcional.
+**Desvantagem**: variância - em curtos períodos, a distribuição real pode divergir bastante da proporcional.
 
 ---
 
-### 6. Fair Share Scheduling
+### 6. Fair Share Scheduling em C e Java
 
 Distribui a CPU entre **grupos** de processos (não entre processos individuais). Cada grupo recebe uma fatia percentual configurada da CPU; dentro do grupo, distribui-se igualmente entre os membros.
+
+**Implementações disponíveis:** `fair-share_Java/src/` e `fair_share_c/fair_share.c`.
 
 ```
 Configuração:
@@ -266,25 +354,29 @@ Tempo →
   ════════════════════════════════════════
 ```
 
-**Arquitetura** (`fair-share/src/`):
-- `Process` — representa um processo com burst time aleatório
-- `ShareGroup` — agrupa processos e calcula a "dívida" do grupo (uso real vs. cota)
-- `Processor` — thread que simula a CPU, com taskswitch por quantum
-- `ReadyQueue` — `PriorityBlockingQueue` que ordena por prioridade (sistema ou grupo)
-- `FSSLogger` — registra em `log.txt` a evolução das taxas de uso por grupo
+**Arquitetura da versão Java** (`fair-share_Java/src/`):
+- `Process` - representa um processo com burst time aleatório
+- `ShareGroup` - agrupa processos e calcula a "dívida" do grupo (uso real vs. cota)
+- `Processor` - thread que simula a CPU, com taskswitch por quantum
+- `ReadyQueue` - `PriorityBlockingQueue` que ordena por prioridade (sistema ou grupo)
+- `FSSLogger` - registra em `log.txt` a evolução das taxas de uso por grupo
 
-A prioridade efetiva de um processo é `prioridade_do_grupo + (prioridade_individual % 1)`, onde a prioridade do grupo é a *diferença* entre o uso real do grupo e sua cota — quanto mais o grupo já consumiu além da cota, menor sua prioridade.
+A prioridade efetiva de um processo é `prioridade_do_grupo + (prioridade_individual % 1)`, onde a prioridade do grupo é a diferença entre o uso real do grupo e sua cota. Quanto mais o grupo já consumiu além da cota, menor sua prioridade.
+
+**Versão em C** (`fair_share_c/fair_share.c`): simula a CPU em um loop lógico, sem criar threads reais, e permite executar em dois modos: `--fss`, considerando a cota dos grupos, e `--system`, usando prioridade simples por processo.
 
 **Vantagem**: garante isolamento entre usuários/departamentos.
 **Desvantagem**: implementação mais complexa; pode prejudicar throughput total.
 
 ---
 
-### 7. Escalonamento Garantido
+### 7. Escalonamento Garantido em C e Java
 
-Promete a cada um dos *N* processos exatamente **1/N do tempo de CPU**. Ajusta a prioridade dinamicamente conforme cada processo recebe mais ou menos do que seu "quinhão".
+Promete dividir o tempo de CPU de forma proporcional entre os processos ativos. Ajusta a prioridade dinamicamente conforme cada processo recebe mais ou menos do que seu quinhão.
 
-**Arquitetura MVC** (`garantido/src/`):
+**Implementações disponíveis:** `garantido_Java/src/` e `escalonamento_garantido_c/escalonamento_garantido.c`.
+
+**Arquitetura MVC da versão Java** (`garantido_Java/src/`):
 
 ```
 ┌────────────────────────────────────────────────────────────┐
@@ -297,7 +389,7 @@ Promete a cada um dos *N* processos exatamente **1/N do tempo de CPU**. Ajusta a
 ┌────────────────────────────────────────────────────────────┐
 │                       CONTROLLER                            │
 │  AbstractEscalonador  (interface)                          │
-│  Escalonador          (singleton — orquestra fila e CPU)   │
+│  Escalonador          (singleton - orquestra fila e CPU)   │
 └──────────────────────────┬─────────────────────────────────┘
                            │ usa
                            ▼
@@ -318,7 +410,7 @@ Promete a cada um dos *N* processos exatamente **1/N do tempo de CPU**. Ajusta a
 
 **Fluxo de execução**:
 
-1. O usuário clica em **Criar** repetidamente para adicionar processos à `FilaEntrada` (entrando com o "surto" — tempo de CPU desejado).
+1. O usuário clica em **Criar** repetidamente para adicionar processos à `FilaEntrada` (entrando com o "surto" - tempo de CPU desejado).
 2. Clica em **Escalonar** → `Escalonador.inicializarFilaProcessos()` move processos da entrada para a `FilaProcessos`, alocando memória.
 3. A *thread* principal já está em `Escalonador.escalona()` (loop infinito).
 4. A cada iteração, o próximo processo é retirado da `FilaProcessos`, recebido pelo `Processador` e processado por `quantum` unidades de tempo.
@@ -329,6 +421,8 @@ Promete a cada um dos *N* processos exatamente **1/N do tempo de CPU**. Ajusta a
 6. Se o processo ainda tem surto restante, volta para a fila; se não, é finalizado e libera memória.
 7. Os botões **Suspender**, **Prosseguir** e **Finalizar** atuam sobre o processo em execução.
 
+**Versão em C** (`escalonamento_garantido_c/escalonamento_garantido.c`): adapta a lógica da versão Java para execução em terminal. Ela mantém processos, fila de entrada, fila de prontos, memória simulada, processador, quantum, atualização de prioridades e geração de `log.txt`, mas remove a dependência da interface gráfica Swing.
+
 **Características adicionais**:
 - Gerência de memória própria com `Memoria` (32 blocos de 4 MB cada).
 - Modelo de tabela customizado para reflexão em tempo real do estado dos processos.
@@ -338,21 +432,21 @@ Promete a cada um dos *N* processos exatamente **1/N do tempo de CPU**. Ajusta a
 
 ## Comparativo dos algoritmos
 
-| Algoritmo            | Preemptivo | Starvation? | Conhece burst? | Adequado a  |
-|----------------------|:----------:|:-----------:|:--------------:|-------------|
-| **SJF / SRTN**       | Sim        | Sim         | Sim            | Batch (CPU médio ótimo) |
-| **Round Robin**      | Sim        | Não         | Não            | Interativo |
-| **Priority**         | Não (aqui) | Sim         | Não            | Tempo real soft, QoS |
-| **Multilevel Queue** | Parcial    | Possível    | Não            | Misto (batch + interativo) |
-| **Lottery**          | Sim        | Não (prob.) | Não            | Geral, justiça probabilística |
-| **Fair Share**       | Sim        | Não (por grupo) | Não       | Multi-usuário |
-| **Garantido**        | Sim        | Não         | Não            | Tempo compartilhado justo |
+| Algoritmo | Implementações | Preemptivo | Starvation? | Conhece burst? | Adequado a |
+|-----------|----------------|:----------:|:-----------:|:--------------:|------------|
+| **SJF / SRTN** | C | Sim | Sim | Sim | Batch, quando se busca menor waiting time médio |
+| **Round Robin** | C e C++ | Sim | Não | Não | Sistemas interativos |
+| **Priority Scheduling** | C e C++ | Não, aqui | Sim | Não | QoS e tempo real soft |
+| **Multilevel Queue** | C | Parcial | Possível | Não | Ambientes mistos, com filas por tipo de processo |
+| **Lottery Scheduling** | C e Java | Sim | Não, probabilisticamente | Não | Justiça probabilística e políticas ajustáveis por tickets |
+| **Fair Share Scheduling** | C e Java | Sim | Não, por grupo | Não | Ambientes multiusuário ou multi-grupo |
+| **Escalonamento Garantido** | C e Java | Sim | Não | Não | Tempo compartilhado justo |
 
 ---
 
 ## Correções aplicadas
 
-A versão original do repositório continha diversos bugs — alguns que impediam a compilação, outros sutis que só apareceriam em casos específicos. Abaixo, a lista completa do que foi corrigido.
+A versão original do repositório continha diversos bugs - alguns que impediam a compilação, outros sutis que só apareceriam em casos específicos. Abaixo, a lista completa do que foi corrigido.
 
 ### `sjf/srtn.c` (anteriormente `srtn.c` na raiz)
 
@@ -369,14 +463,14 @@ A versão original do repositório continha diversos bugs — alguns que impedia
 | 9 | Arrays fixos `[10]` sem validação | `MAX = 100` + checagem de `n` | Buffer overflow garantido se `n > 10`. |
 | 10 | Erros de digitação (`turnaroun`, etc.) | Padronizados | Legibilidade. |
 
-### `round-robin/round_Robin.cpp`
+### `round-robin_cpp/round_Robin.cpp`
 
 | # | Bug original | Correção | Justificativa |
 |---|--------------|----------|---------------|
 | 1 | `int rem_bt[n]; int wt[n]; int tat[n];` | `std::vector<int>` | VLAs **não fazem parte do C++ padrão** (são extensão GCC). Não compilam com `clang++ -pedantic` ou MSVC. |
 | 2 | Parâmetro `int processes[]` sem uso interno | Mantido apenas onde é exibido | Limpeza. |
 
-### `priority/priority.cpp`
+### `priority_cpp/priority.cpp`
 
 | # | Bug original | Correção | Justificativa |
 |---|--------------|----------|---------------|
@@ -393,7 +487,7 @@ Este foi o arquivo com mais problemas estruturais.
 | 1 | Extensão `.cpp` mas código C puro | Renomeado para `.c` | Usa `stdio.h`, `stdbool.h`, não usa features C++. Convenção. |
 | 2 | `RR()`, `PS()`, `FCFS()` se chamam mutuamente sem **forward declaration** | Reestruturado | Em C, função não pode ser chamada antes de declarada. O código original não compilava nem com GCC permissivo. |
 | 3 | **Recursão mútua infinita**: `RR → PS → FCFS → RR → ...` | Loop principal único | Cada chamada empilha um frame. Em workloads longos → **stack overflow**. Substituído por um `while (!todos_terminaram())` que invoca `run_RR()`, `run_PS()`, `run_FCFS()` em sequência. |
-| 4 | `if (q == 10 || prc[queue1[0]].rem_burst_time == 0 && prc[queue1[1]].rem_burst_time == 0)` | Lógica reescrita | (a) Precedência: `&&` liga mais forte que `||`, então a expressão era `q==10 \|\| (a && b)` — provavelmente o intento. (b) `queue1[1]` é **segfault se só houver 1 processo na fila**. |
+| 4 | `if (q == 10 || prc[queue1[0]].rem_burst_time == 0 && prc[queue1[1]].rem_burst_time == 0)` | Lógica reescrita | (a) Precedência: `&&` liga mais forte que `||`, então a expressão era `q==10 \|\| (a && b)` - provavelmente o intento. (b) `queue1[1]` é **segfault se só houver 1 processo na fila**. |
 | 5 | Variável global `int queue` declarada mas nunca usada | Removida | Lixo. |
 | 6 | `i = 0; break;` dentro do `for` (gambiarra para reiniciar) | Loops reestruturados com `gasto < FATIA` | Difícil de auditar e ineficiente. |
 | 7 | `exit(0)` em meio à recursão | Retorno limpo pelo `main` | `exit(0)` no meio de funções recursivas impede liberação de recursos e dificulta uso como biblioteca. |
@@ -401,7 +495,7 @@ Este foi o arquivo com mais problemas estruturais.
 | 9 | Arrays globais sem `static` | Marcados `static` | Encapsulamento (escopo de arquivo). |
 | 10 | Sem validação de entrada | `scanf` retorna verificado | Robustez. |
 
-### `lottery/Lottery.java`
+### `lottery_Java/Lottery.java`
 
 | # | Bug original | Correção | Justificativa |
 |---|--------------|----------|---------------|
@@ -414,11 +508,11 @@ Este foi o arquivo com mais problemas estruturais.
 | 7 | Mistura de identação tabs/espaços e indentação confusa | Padronizado (4 espaços) | Legibilidade. |
 | 8 | Avanço de `time` em vários locais com lógica conflitante | Centralizado em `time += consumido` | Tornava difícil rastrear o "tempo simulado". |
 
-### `garantido/` — Java MVC
+### `garantido_Java/` - Java MVC
 
 | # | Bug original | Correção | Justificativa |
 |---|--------------|----------|---------------|
-| 1 | 3 arquivos em **ISO-8859-1** (`Memoria.java`, `TelaJFrame.java`, `Escalonador.java`) | Convertidos para UTF-8 | `javac` moderno (Java 11+) usa UTF-8 por padrão. Os arquivos não compilavam — erros `unmappable character`. |
+| 1 | 3 arquivos em **ISO-8859-1** (`Memoria.java`, `TelaJFrame.java`, `Escalonador.java`) | Convertidos para UTF-8 | `javac` moderno (Java 11+) usa UTF-8 por padrão. Os arquivos não compilavam - erros `unmappable character`. |
 | 2 | `AbstractEscalonador.getProximoProcesso()` retorna `Thread` | Alterado para `Processo` | Inconsistência semântica. Funcionava por covariância (`Processo extends Thread`), mas a interface deveria refletir o domínio. |
 | 3 | `definirQuantum()`: `filaProcessos.tamanho() * 2 / filaProcessos.tamanho()` | Reescrito como `Math.max(2, Math.min(10, 20/qtd))` | O cálculo original **sempre retorna 2** (n*2/n). Era um bug; substituído por uma fórmula proporcional real. |
 | 4 | `escalona()` com `while(true)` **sem nada para fazer quando a fila esvazia** | Adicionado `Thread.sleep(200)` no loop externo | Busy-wait → 100% de CPU em um core sempre que a fila ficava vazia. |
@@ -433,12 +527,11 @@ Este foi o arquivo com mais problemas estruturais.
 | 13 | Cast redundante `(Processo) processo` (já era `Processo`) | Removido | Warning `[cast]` no `javac`. |
 | 14 | Cast redundante `(String[]) i.next()` (iterator já era genérico) | Removido | Warning `[cast]`. |
 
-### `fair-share/`
+### `fair-share_Java/`
 
 | # | Bug original | Correção | Justificativa |
 |---|--------------|----------|---------------|
-| 1 | Arquivo `c.c` contendo apenas `cddd` | **Removido** | Lixo (provavelmente um *typo* de comando no terminal salvo por engano). |
-| 2 | (Mantido) `catch(NullPointerException)` vazio em `ReadyQueue.schedule()` | Mantido com comentário | Defensivo contra race condition entre `isEmpty()` e `poll()` em `PriorityBlockingQueue`. Não é elegante, mas é funcional. |
+| 1 | (Mantido) `catch(NullPointerException)` vazio em `ReadyQueue.schedule()` | Mantido com comentário | Defensivo contra race condition entre `isEmpty()` e `poll()` em `PriorityBlockingQueue`. Não é elegante, mas é funcional. |
 
 ---
 
@@ -448,7 +541,7 @@ Alguns aspectos foram **deliberadamente não corrigidos** por exigirem refatora�
 
 ### Garantido
 
-- **`Processo extends Thread` mas nunca usa thread**: a herança é semanticamente confusa, mas refatorar exigiria mudar todas as APIs do projeto. O código funciona — `Processo` é apenas tratado como objeto de dados.
+- **`Processo extends Thread` mas nunca usa thread**: a herança é semanticamente confusa, mas refatorar exigiria mudar todas as APIs do projeto. O código funciona - `Processo` é apenas tratado como objeto de dados.
 - **`Processador.processa()` chama `Thread.sleep(1000)`**: quando disparado pela UI (botão "Escalonar"), o sleep acontece na **thread principal do escalonador** (não na EDT do Swing), então a UI continua responsiva. Mas a atualização da tabela é feita fora da EDT via `TelaJFrame.atualizarLinha()`, o que **viola o contrato do Swing**. Em produção, deveria usar `SwingUtilities.invokeLater()` ou `SwingWorker`.
 - **Não há mecanismo de parar o escalonador**: o `while(true)` em `escalona()` só pode ser interrompido fechando a JVM.
 - **`Memoria` não trata fragmentação automaticamente**: `desfragmenta()` foi implementado mas nunca é chamado automaticamente.
@@ -467,7 +560,7 @@ Alguns aspectos foram **deliberadamente não corrigidos** por exigirem refatora�
 
 ## Licença e créditos
 
-Material didático para a disciplina de **Sistemas Operacionais — Sistemas Interativos**.
+Material didático para a disciplina de **Sistemas Operacionais - Sistemas Interativos**.
 Autoria das versões originais creditada nos comentários dos arquivos Java (`@author Menno.VanDiermen` no fair-share, `By Pimpolhos` no garantido).
 
 Reorganização, correção de bugs e documentação: versão revisada.
